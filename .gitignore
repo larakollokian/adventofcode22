@@ -146,4 +146,4 @@ build-iPhoneSimulator/
 
 ### advent of code specifics
 # skipping input test files since they're irrelevant to the solutions
-input.txt
+*input.txt
