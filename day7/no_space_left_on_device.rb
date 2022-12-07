@@ -1,35 +1,25 @@
 def part_one
     path = []
     file_system = {}
+    # https://stackoverflow.com/questions/51773296/use-an-array-to-access-nested-hash-keys
+    file_system.default_proc = -> (h, k) { h[k] = Hash.new(&h.default_proc) }
     current_size = 0
     File.readlines('day7/example_input.txt').each do |line|
         if entering_directory?(line)
             directory_name = line.split.last
-            puts "starting"
-            puts directory_name
-            puts "previous current_size"
-            puts current_size
-            deep_set(file_system, path + ["files"], current_size)
+            nest(file_system, path + ["files"], current_size)
             path.push(directory_name)
         elsif listing_directory?(line)
             current_size = 0
         elsif exiting_directory?(line) 
-            # deep_set(file_system, path + ["files"], current_size)
+            nest(file_system, path + ["files"], current_size)
             leaving = path.pop
-            puts "exiting"
-            puts leaving
-            # puts current_size
         else
-            puts "line size"
-            puts line.split.first.to_i unless directory?(line)
             current_size = current_size + line.split.first.to_i unless directory?(line)
         end 
     end
-
     # finish off the parsing
-    puts "previous current_size"
-    puts current_size
-    deep_set(file_system, path + ["files"], current_size)
+    nest(file_system, path + ["files"], current_size)
 
     puts file_system
 end
@@ -54,12 +44,11 @@ def directory?(line)
 end
 
 # https://stackoverflow.com/questions/51773296/use-an-array-to-access-nested-hash-keys
-def deep_set(hash, path, value)
-    *path, final_key = path
-    to_set = path.empty? ? hash : hash.dig(*path)
-  
-    return unless to_set
-    to_set[final_key] = value
+def nest(hash, path, value)
+    if path[0] != "files" && hash.dig(*path[0..-2])[path.fetch(-1)] == {}
+        hash.dig(*path[0..-2])[path.fetch(-1)] = value
+    end
+    hash
 end
 
 puts "Part one:"
